@@ -113,15 +113,20 @@ Stateless server design → easy horizontal scaling
 Layer isolation → independent optimization possible
 Future caching layer (Redis) → reduce DB load
 Connection pooling via Sequelize
+
+
 🔒 Security Considerations (Planned)
 JWT-based authentication
 Input validation middleware
 Rate limiting to prevent abuse
 SQL injection protection via ORM
+
+
 🧪 Testing Strategy (To Be Implemented)
 Unit tests for services
 Integration tests for APIs
 Mocking repository layer
+
 🔮 Future Enhancements
 🔐 Authentication & Role-Based Access Control
 ⚡ Redis Caching Layer
@@ -129,6 +134,7 @@ Mocking repository layer
 🐳 Docker & CI/CD Pipeline
 💳 Payment Integration
 ✈️ Seat Availability & Dynamic Pricing
-👨‍💻 Author
 
+
+👨‍💻 Author
 Atul Rana
