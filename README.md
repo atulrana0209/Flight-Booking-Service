@@ -1,48 +1,196 @@
-This is a base node js project template, which anyone can use as it has been prepared, by keeping some of the most important code principles and project management recommendations. Feel free to change anything. 
+# Flight Booking Service
 
+A backend service for managing flight-related operations using **Node.js, Express.js, Sequelize, and MySQL**.
 
-`src` -> Inside the src folder all the actual source code regarding the project will reside, this will not include any kind of tests. (You might want to make separate tests folder)
+The project follows a clean and modular backend architecture, separating API routes, controllers, business logic, database operations, configuration, and utility functions.
 
-Lets take a look inside the `src` folder
+## Project Structure
 
- - `config` -> In this folder anything and everything regarding any configurations or setup of a library or module will be done. For example: setting up `dotenv` so that we can use the environment variables anywhere in a cleaner fashion, this is done in the `server-config.js`. One more example can be to setup you logging library that can help you to prepare meaningful logs, so configuration for this library should also be done here. 
+The main source code is inside the `src` folder.
 
- - `routes` -> In the routes folder, we register a route and the corresponding middleware and controllers to it. 
+```text
+src/
+├── config/
+├── controllers/
+├── middlewares/
+├── repositories/
+├── routes/
+├── services/
+└── utils/
+```
 
- - `middlewares` -> they are just going to intercept the incoming requests where we can write our validators, authenticators etc. 
+### `config`
 
- - `controllers` -> they are kind of the last middlewares as post them you call you business layer to execute the budiness logic. In controllers we just receive the incoming requests and data and then pass it to the business layer, and once business layer returns an output, we structure the API response in controllers and send the output. 
+Contains configuration and setup for libraries and application-level services.
 
- - `repositories` -> this folder contains all the logic using which we interact the DB by writing queries, all the raw queries or ORM queries will go here.
+For example:
 
- - `services` -> contains the buiness logic and interacts with repositories for data from the database
+* Environment variable configuration using `dotenv`
+* Database configuration
+* Logger configuration
+* Other application-level setup
 
- - `utils` -> contains helper methods, error classes etc.
+### `routes`
 
-### Setup the project
+Contains API routes and connects them with the required middleware and controllers.
 
- - Download this template from github and open it in your favourite text editor. 
- - Go inside the folder path and execute the following command:
-  ```
-  npm install
-  ```
- - In the root directory create a `.env` file and add the following env variables
-    ```
-        PORT=<port number of your choice>
-    ```
-    ex: 
-    ```
-        PORT=3000
-    ```
- - go inside the `src` folder and execute the following command:
-    ```
-      npx sequelize init
-    ```
- - By executing the above command you will get migrations and seeders folder along with a config.json inside the config folder. 
- - If you're setting up your development environment, then write the username of your db, password of your db and in dialect mention whatever db you are using for ex: mysql, mariadb etc
- - If you're setting up test or prod environment, make sure you also replace the host with the hosted db url.
+### `middlewares`
 
- - To run the server execute
- ```
- npm run dev
- ```
+Contains middleware functions that process incoming requests before they reach the controllers.
+
+Examples include:
+
+* Request validation
+* Authentication
+* Authorization
+* Error handling
+
+### `controllers`
+
+Controllers handle incoming HTTP requests and prepare API responses.
+
+They:
+
+1. Receive request data
+2. Validate or extract required information
+3. Call the appropriate service
+4. Receive the result from the service
+5. Send the API response
+
+### `services`
+
+Contains the main business logic of the application.
+
+Services process application-specific operations and communicate with repositories whenever database access is required.
+
+### `repositories`
+
+Contains database-related operations.
+
+This layer is responsible for interacting with the database using Sequelize ORM queries or other database queries.
+
+### `utils`
+
+Contains reusable helper functions and common utilities such as:
+
+* Custom error classes
+* Helper methods
+* Common functions used across the application
+
+---
+
+## Architecture
+
+The project follows a layered backend architecture:
+
+```text
+Client
+   ↓
+Routes
+   ↓
+Middlewares
+   ↓
+Controllers
+   ↓
+Services
+   ↓
+Repositories
+   ↓
+Database
+```
+
+This separation keeps the code modular, maintainable, and easier to extend.
+
+---
+
+## Setup the Project
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/atulrana0209/Flight-Booking-Service.git
+cd Flight-Booking-Service
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure environment variables
+
+Create a `.env` file in the root directory:
+
+```env
+PORT=3000
+```
+
+Add other required database or application environment variables as needed.
+
+### 4. Configure Sequelize
+
+Go inside the `src` directory:
+
+```bash
+cd src
+```
+
+Initialize Sequelize:
+
+```bash
+npx sequelize init
+```
+
+This will create the required Sequelize folders and configuration files.
+
+Configure your database credentials in the Sequelize configuration.
+
+For example:
+
+```json
+{
+  "development": {
+    "username": "your_username",
+    "password": "your_password",
+    "database": "your_database",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
+```
+
+For production or testing environments, use the appropriate database credentials and hosted database URL.
+
+### 5. Run the application
+
+From the project root directory, run:
+
+```bash
+npm run dev
+```
+
+The server will start on the port specified in your `.env` file.
+
+For example:
+
+```text
+http://localhost:3000
+```
+
+---
+
+## Technologies Used
+
+* **Node.js**
+* **Express.js**
+* **JavaScript**
+* **MySQL**
+* **Sequelize**
+* **REST APIs**
+* **dotenv**
+* **Git & GitHub**
+
+## License
+
+This project is intended for learning and development purposes.
