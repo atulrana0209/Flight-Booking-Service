@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: flights-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: flights_dev
+      MYSQL_USER: flight_user
+      MYSQL_PASSWORD: flight_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "flight_user", "-pflight_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flights-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: flight_user
+      DB_PASSWORD: flight_password
+      DB_NAME: flights_dev
+      JWT_SECRET: super_secret_jwt_key_for_flight_booking_service
+      JWT_EXPIRY: 1d
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: sh -c "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && npm start"
+
+volumes:
+  mysql_data:

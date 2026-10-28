@@ -1,22 +1,6 @@
 const { StatusCodes } = require('http-status-codes');
-
 const { FlightService } = require('../services');
-const { SuccessResponse, ErrorResponse } = require('../utils/common');
 
-/**
- * POST : /flights 
- * req-body {
- *  flightNumber: 'UK 808',
- *  airplaneId: 'a380',
- *  departureAirportId: 12,
- *  arrivalAirportId: 11,
- *  arrivalTime: '11:10:00',
- *  departureTime: '9:10:00',
- *  price: 2000
- *  boardingGate: '12A',
- *  totalSeats: 120
- * }
- */
 async function createFlight(req, res) {
     try {
         const flight = await FlightService.createFlight({
@@ -30,76 +14,88 @@ async function createFlight(req, res) {
             boardingGate: req.body.boardingGate,
             totalSeats: req.body.totalSeats
         });
-        SuccessResponse.data = flight;
-        return res
-                .status(StatusCodes.CREATED)
-                .json(SuccessResponse);
+
+        return res.status(StatusCodes.CREATED).json({
+            success: true,
+            message: 'Successfully created a flight',
+            data: flight,
+            error: {}
+        });
     } catch(error) {
-        ErrorResponse.error = error;
-        return res
-                .status(error.statusCode)
-                .json(ErrorResponse);
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message || 'Something went wrong while creating flight',
+            data: {},
+            error: { explanation: error.explanation || [error.message] }
+        });
     }
 }
 
 async function getAllFlights(req, res) {
     try {
         const flights = await FlightService.getAllFlights(req.query);
-        SuccessResponse.data = flights;
-        return res
-                .status(StatusCodes.CREATED)
-                .json(SuccessResponse);
+        return res.status(StatusCodes.OK).json({
+            success: true,
+            message: 'Successfully fetched all flights',
+            data: flights,
+            error: {}
+        });
     } catch(error) {
-        ErrorResponse.error = error;
-        return res
-                .status(error.statusCode)
-                .json(ErrorResponse);
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message || 'Something went wrong while fetching flights',
+            data: {},
+            error: { explanation: error.explanation || [error.message] }
+        });
     }
 }
 
-/**
- * POST : /flights/:id 
- * req-body {}
- */
 async function getFlight(req, res) {
     try {
         const flight = await FlightService.getFlight(req.params.id);
-        SuccessResponse.data = flight;
-        return res
-                .status(StatusCodes.OK)
-                .json(SuccessResponse);
+        return res.status(StatusCodes.OK).json({
+            success: true,
+            message: 'Successfully fetched flight details',
+            data: flight,
+            error: {}
+        });
     } catch(error) {
-        ErrorResponse.error = error;
-        return res
-                .status(error.statusCode)
-                .json(ErrorResponse);
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message || 'Something went wrong while fetching flight',
+            data: {},
+            error: { explanation: error.explanation || [error.message] }
+        });
     }
 }
 
 async function updateSeats(req, res) {
     try {
-        console.log(req.body);
         const response = await FlightService.updateSeats({
             flightId: req.params.id,
             seats: req.body.seats, 
             dec: req.body.dec
         });
-        SuccessResponse.data = response;
-        return res
-                .status(StatusCodes.OK)
-                .json(SuccessResponse);
+
+        return res.status(StatusCodes.OK).json({
+            success: true,
+            message: 'Successfully updated seats of the flight',
+            data: response,
+            error: {}
+        });
     } catch(error) {
-        ErrorResponse.error = error;
-        return res
-                .status(error.statusCode)
-                .json(ErrorResponse);
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message || 'Something went wrong while updating seats',
+            data: {},
+            error: { explanation: error.explanation || [error.message] }
+        });
     }
 }
-
 
 module.exports = {
     createFlight,
     getAllFlights,
     getFlight,
     updateSeats
-}
+};

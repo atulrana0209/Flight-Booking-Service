@@ -1,4 +1,7 @@
 node_modules/
 .env
 combined.log
+error.log
+coverage/
+.DS_Store
 src/config/config.json

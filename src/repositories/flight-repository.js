@@ -1,18 +1,18 @@
 const { Sequelize } = require('sequelize');
+const { StatusCodes } = require('http-status-codes');
 
 const CrudRepository = require('./crud-repository');
 const { Flight, Airplane, Airport, City } = require('../models');
 const db = require('../models');
-const { addRowLockOnFlights } = require('./queries');
-
+const AppError = require('../utils/errors/app-error');
 
 class FlightRepository extends CrudRepository {
     constructor() {
         super(Flight);
     }
 
-    async getAllFlights(filter, sort) {
-        const response = await Flight.findAll({
+    async getAllFlights(filter, sort, pagination = {}) {
+        const queryOptions = {
             where: filter,
             order: sort,
             include: [
@@ -25,7 +25,7 @@ class FlightRepository extends CrudRepository {
                     model: Airport,
                     required: true,
                     as: 'departureAirport',
-                    on : {
+                    on: {
                         col1: Sequelize.where(Sequelize.col("Flight.departureAirportId"), "=", Sequelize.col("departureAirport.code"))
                     },
                     include: {
@@ -37,7 +37,7 @@ class FlightRepository extends CrudRepository {
                     model: Airport,
                     required: true,
                     as: 'arrivalAirport',
-                    on : {
+                    on: {
                         col1: Sequelize.where(Sequelize.col("Flight.arrivalAirportId"), "=", Sequelize.col("arrivalAirport.code"))
                     },
                     include: {
@@ -46,27 +46,57 @@ class FlightRepository extends CrudRepository {
                     }
                 }
             ]
-        });
+        };
+
+        if (pagination.limit !== undefined) {
+            queryOptions.limit = pagination.limit;
+        }
+        if (pagination.offset !== undefined) {
+            queryOptions.offset = pagination.offset;
+        }
+
+        const response = await Flight.findAndCountAll(queryOptions);
         return response;
     }
 
-    async updateRemainingSeats(flightId, seats, dec = true) {
-        const transaction = await db.sequelize.transaction();
+    async updateRemainingSeats(flightId, seats, dec = true, externalTransaction = null) {
+        const transaction = externalTransaction || await db.sequelize.transaction();
         try {
-            await db.sequelize.query(addRowLockOnFlights(flightId));
-            const flight = await Flight.findByPk(flightId);
-            if(+dec) {
-                await flight.decrement('totalSeats', {by: seats}, {transaction: transaction});
-            } else {
-                await flight.increment('totalSeats', {by: seats}, {transaction: transaction});
+            const flight = await Flight.findByPk(flightId, {
+                transaction,
+                lock: transaction.LOCK.UPDATE
+            });
+
+            if (!flight) {
+                throw new AppError('The flight you requested does not exist', StatusCodes.NOT_FOUND);
             }
-            await transaction.commit();
+
+            const seatCount = Number(seats);
+            if (isNaN(seatCount) || seatCount <= 0) {
+                throw new AppError('Invalid seat count requested', StatusCodes.BAD_REQUEST);
+            }
+
+            if (+dec) {
+                if (flight.totalSeats < seatCount) {
+                    throw new AppError('Insufficient seats available on this flight', StatusCodes.BAD_REQUEST);
+                }
+                await flight.decrement('totalSeats', { by: seatCount, transaction });
+            } else {
+                await flight.increment('totalSeats', { by: seatCount, transaction });
+            }
+
+            await flight.reload({ transaction });
+
+            if (!externalTransaction) {
+                await transaction.commit();
+            }
             return flight;
-        } catch(error) {
-            await transaction.rollback();
+        } catch (error) {
+            if (!externalTransaction) {
+                await transaction.rollback();
+            }
             throw error;
         }
-       
     }
 }
 

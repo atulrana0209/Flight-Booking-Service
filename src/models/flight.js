@@ -23,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'arrivalAirportId',
         as: 'arrivalAirport',
       });
+      this.hasMany(models.Booking, {
+        foreignKey: 'flightId',
+        as: 'bookings',
+        onDelete: 'CASCADE'
+      });
     }
   }
   Flight.init({
@@ -59,7 +64,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     totalSeats: { // total remaining seats
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        min: { args: [0], msg: 'Total remaining seats cannot be negative' }
+      }
     },
   }, {
     sequelize,
